@@ -8,3 +8,13 @@ C:\Users\ewingchen\source\repos\WinFormTestConnectApp\WinFormTestConnectApp\obj\
 C:\Users\ewingchen\source\repos\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.exe
 C:\Users\ewingchen\source\repos\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.pdb
 C:\Users\ewingchen\source\repos\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.Form1.resources
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\bin\x64\Debug\WinFormTestConnectApp.exe.config
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\bin\x64\Debug\WinFormTestConnectApp.exe
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\bin\x64\Debug\WinFormTestConnectApp.pdb
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.csproj.AssemblyReference.cache
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.Form1.resources
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.Properties.Resources.resources
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.csproj.GenerateResource.cache
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.csproj.CoreCompileInputs.cache
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.exe
+C:\Users\ewingchen\source\repos\Winsock Example\WinFormTestConnectApp\WinFormTestConnectApp\obj\x64\Debug\WinFormTestConnectApp.pdb

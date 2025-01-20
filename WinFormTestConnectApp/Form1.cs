@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
 using System.IO;
-using System.Text;
-using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace WinFormTestConnectApp
 {
@@ -49,7 +47,7 @@ namespace WinFormTestConnectApp
         /// <param name="productSeries">產品系列</param>
         /// <param name="applicableProjects">適用專案</param>
         [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr GetBinFileInfo(string askId, string productSeries, string applicableProjects);
+        public static extern IntPtr GetBinFileInfo(string askId, string productSeries, string applicableProjects, string customizeId);
 
         public Form1()
         {
@@ -64,14 +62,15 @@ namespace WinFormTestConnectApp
             string askId = "MainApp";
             string productSeries = "BMS";
             string applicableProjects = "Thai";
+            string customizeId = "10000";
 
-            FileStream fileStream = null;
+            FileStream fileStream;
 
             try
             {
                 if (isInitialized)
                 {
-                    IntPtr fileInfoPtr = GetBinFileInfo(askId, productSeries, applicableProjects);
+                    IntPtr fileInfoPtr = GetBinFileInfo(askId, productSeries, applicableProjects, customizeId);
                     if (fileInfoPtr == IntPtr.Zero)
                     {
                         throw new Exception("Failed to receive file");
