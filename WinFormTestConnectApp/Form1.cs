@@ -18,40 +18,6 @@ namespace WinFormTestConnectApp
             public string FileName;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct MainAppInfo
-        {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-            public string Version;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-            public string BLVersion;
-            public int CalibrationOffset;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct ShieldedZoneInfo
-        {
-            public int start;
-            public int end;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-        public struct DefaultParametersInfo
-        {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-            public string Version;
-
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-            public string BLVersion;
-
-            public int CalibrationOffset;
-
-            public int ShieldedZoneCount;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50)]
-            public ShieldedZoneInfo[] ShieldedZone;
-        }
-
         /// <summary>
         /// 初始化客戶端
         /// </summary>
@@ -76,12 +42,6 @@ namespace WinFormTestConnectApp
         [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void FreeFileInfo(IntPtr fileInfo);
 
-        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SendData(string askId, string productSeries, string applicableProjects, bool isGetFile = false);
-
-        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ReceiveData(byte[] buffer, int bufferSize);
-
         /// <summary>
         /// 獲取.bin檔 IntPtr 轉換成 FileInfo 結構
         /// </summary>
@@ -90,12 +50,6 @@ namespace WinFormTestConnectApp
         /// <param name="applicableProjects">適用專案</param>
         [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr GetBinFileInfo(string askId, string productSeries, string applicableProjects);
-
-        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr GetMainAppInfo(string productSeries, string applicableProjects);
-
-        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr GetDefaultParametersInfo(string productSeries, string applicableProjects);
 
         public Form1()
         {
@@ -150,7 +104,7 @@ namespace WinFormTestConnectApp
                 }
                 else
                 {
-                    label2.Text = "Not Connecting";
+                    label2.Text = "Not Connected";
                 }
             }
             catch (Exception ex)
@@ -164,42 +118,7 @@ namespace WinFormTestConnectApp
         {
             CloseConnection();
             isInitialized = false;
-            label2.Text = "Not Connecting";
-        }
-
-        private void GetData_Click(object sender, EventArgs e)
-        {
-            if (!isInitialized)
-            {
-                label2.Text = "Not Connecting";
-                return;
-            }
-            string askId = "MainApp";
-            string productSeries = "BMS";
-            string applicableProjects = "Thai";
-
-            int result;
-            try
-            {
-                result = SendData(askId, productSeries, applicableProjects);
-                if (result == -1)
-                {
-                    label1.Text = "Error";
-                }
-
-                byte[] buffer = new byte[4096];
-                int bytesReceived = ReceiveData(buffer, buffer.Length);
-                if (bytesReceived > 0)
-                {
-                    // 處理接收到的數據
-                    string receivedData = Encoding.UTF8.GetString(buffer, 0, bytesReceived);
-                    label1.Text = receivedData;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"sError connecting: {ex}");
-            }
+            label2.Text = "Not Connected";
         }
 
         private void InitializeConnect(object sender, EventArgs e)
@@ -215,51 +134,6 @@ namespace WinFormTestConnectApp
             isInitialized = InitializeClient(stationType, stationName, stationId, operatorId);
 
             if (isInitialized) label2.Text = "Connecting";
-        }
-
-        private void GetMainApp_Click(object sender, EventArgs e)
-        {
-            if (!isInitialized)
-            {
-                label2.Text = "Not Connecting";
-                return;
-            }
-            string productSeries = "BMS";
-            string applicableProjects = "Thai";
-
-            IntPtr mainAppInfoPtr = GetMainAppInfo(productSeries, applicableProjects);
-            MainAppInfo mainAppInfo = Marshal.PtrToStructure<MainAppInfo>(mainAppInfoPtr);
-            label1.Text = "Version: " + mainAppInfo.Version + "\n" +
-                "BLVersion: " + mainAppInfo.BLVersion + "\n" +
-                "CalibrationOffset: " + mainAppInfo.CalibrationOffset + "\n";
-        }
-
-        private void GetDefaultParameters_Click(object sender, EventArgs e)
-        {
-            if (!isInitialized)
-            {
-                label2.Text = "Not Connecting";
-                return;
-            }
-            string productSeries = "BMS";
-            string applicableProjects = "Thai";
-
-            IntPtr defaultParaInfoPtr = GetDefaultParametersInfo(productSeries, applicableProjects);
-            DefaultParametersInfo defaultParaInfo = Marshal.PtrToStructure<DefaultParametersInfo>(defaultParaInfoPtr);
-
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < defaultParaInfo.ShieldedZoneCount; i++)
-            {
-                int start = defaultParaInfo.ShieldedZone[i].start;
-                int end = defaultParaInfo.ShieldedZone[i].end;
-                sb.AppendLine($"Shielded Zone: start={start}, end={end}");
-            };
-
-            label1.Text = "Version: " + defaultParaInfo.Version + "\n" +
-                "BLVersion: " + defaultParaInfo.BLVersion + "\n" +
-                "CalibrationOffset: " + defaultParaInfo.CalibrationOffset + "\n" +
-                "ShieldedZoneCount: " + defaultParaInfo.ShieldedZoneCount + "\n" +
-                sb.ToString();
         }
     }
 }
