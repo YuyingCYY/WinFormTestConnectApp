@@ -7,54 +7,27 @@ namespace WinFormTestConnectApp
 {
     public partial class Form1 : Form
     {
-        [StructLayout(LayoutKind.Sequential)]
-        private struct FileInfo
-        {
-            public IntPtr Data;
-            public UIntPtr Size;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-            public string FileName;
-        }
-
-        /// <summary>
-        /// 初始化客戶端
-        /// </summary>
-        /// <param name="stationType">本站類型</param>
-        /// <param name="stationName">本站名稱</param>
-        /// <param name="stationId">本站號碼</param>
-        /// <param name="operatorId">登入操作人員</param>
-        /// <returns>連接是否成功</returns>
-        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool InitializeClient(string stationType, string stationName, string stationId, string operatorId);
-
-        /// <summary>
-        /// 關閉連接
-        /// </summary>
-        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void CloseConnection();
-
-        /// <summary>
-        /// 釋放資源
-        /// </summary>
-        /// <param name="fileInfo"></param>
-        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void FreeFileInfo(IntPtr fileInfo);
-
-        /// <summary>
-        /// 獲取.bin檔 IntPtr 轉換成 FileInfo 結構
-        /// </summary>
-        /// <param name="askId">站點類型</param>
-        /// <param name="productSeries">產品系列</param>
-        /// <param name="applicableProjects">適用專案</param>
-        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr GetBinFileInfo(string askId, string productSeries, string applicableProjects, string customizeId);
-
         public Form1()
         {
             InitializeComponent();
         }
 
         bool isInitialized = false;
+
+        private void InitializeConnect(object sender, EventArgs e)
+        {
+            if (isInitialized) return;
+
+            string stationType = "type";
+            string stationName = "name";
+            string stationId = "id";
+            string operatorId = "operatorId";
+
+            // 初始化連接至Server
+            isInitialized = SocketClientAPI.InitializeClient(stationType, stationName, stationId, operatorId);
+
+            if (isInitialized) label2.Text = "Connecting";
+        }
 
         private void GetFile_Click(object sender, EventArgs e)
         {
@@ -70,7 +43,7 @@ namespace WinFormTestConnectApp
             {
                 if (isInitialized)
                 {
-                    IntPtr fileInfoPtr = GetBinFileInfo(askId, productSeries, applicableProjects, customizeId);
+                    IntPtr fileInfoPtr = SocketClientAPI.GetBinFileInfo(askId, productSeries, applicableProjects, customizeId);
                     if (fileInfoPtr == IntPtr.Zero)
                     {
                         throw new Exception("Failed to receive file");
@@ -78,7 +51,7 @@ namespace WinFormTestConnectApp
                     try
                     {
                         // 將 Ptr 轉換成 FileInfo 結構
-                        FileInfo fileInfo = Marshal.PtrToStructure<FileInfo>(fileInfoPtr);
+                        SocketClientAPI.FileInfo fileInfo = Marshal.PtrToStructure<SocketClientAPI.FileInfo>(fileInfoPtr);
                         byte[] buffer = new byte[(int)fileInfo.Size];
                         Marshal.Copy(fileInfo.Data, buffer, 0, (int)fileInfo.Size);
 
@@ -98,7 +71,7 @@ namespace WinFormTestConnectApp
                     }
                     finally
                     {
-                        FreeFileInfo(fileInfoPtr);
+                        SocketClientAPI.FreeFileInfo(fileInfoPtr);
                     }
                 }
                 else
@@ -115,24 +88,9 @@ namespace WinFormTestConnectApp
 
         private void CloseConnect_Click(object sender, EventArgs e)
         {
-            CloseConnection();
+            SocketClientAPI.CloseConnection();
             isInitialized = false;
             label2.Text = "Not Connected";
-        }
-
-        private void InitializeConnect(object sender, EventArgs e)
-        {
-            if (isInitialized) return;
-
-            string stationType = "type";
-            string stationName = "name";
-            string stationId = "id";
-            string operatorId = "operatorId";
-
-            // 初始化連接至Server
-            isInitialized = InitializeClient(stationType, stationName, stationId, operatorId);
-
-            if (isInitialized) label2.Text = "Connecting";
         }
     }
 }
