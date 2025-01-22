@@ -37,31 +37,13 @@ namespace WinFormTestConnectApp
             string applicableProjects = "Thai";
             string customizeId = "10000";
 
-            FileStream fileStream;
-
             try
             {
                 if (isInitialized)
                 {
-                    IntPtr fileInfoPtr = SocketClientAPI.GetBinFileInfo(askId, productSeries, applicableProjects, customizeId);
-                    if (fileInfoPtr == IntPtr.Zero)
-                    {
-                        throw new Exception("Failed to receive file");
-                    }
+                    FileStream fileStream = SocketClientAPI.GetBinFileStream(askId, productSeries, applicableProjects, customizeId);
                     try
                     {
-                        // 將 Ptr 轉換成 FileInfo 結構
-                        SocketClientAPI.FileInfo fileInfo = Marshal.PtrToStructure<SocketClientAPI.FileInfo>(fileInfoPtr);
-                        byte[] buffer = new byte[(int)fileInfo.Size];
-                        Marshal.Copy(fileInfo.Data, buffer, 0, (int)fileInfo.Size);
-
-                        // 創建臨時檔案
-                        string tempPath = Path.Combine(Path.GetTempPath(), fileInfo.FileName);
-                        File.WriteAllBytes(tempPath, buffer);
-
-                        // 返回檔案的FileStream，使用FileMode.Open確保檔案存在
-                        fileStream = new FileStream(tempPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.DeleteOnClose);
-
                         // 測試用 查看內容是否正確
                         using (var reader = new StreamReader(fileStream))
                         {
@@ -71,7 +53,7 @@ namespace WinFormTestConnectApp
                     }
                     finally
                     {
-                        SocketClientAPI.FreeFileInfo(fileInfoPtr);
+                        fileStream.Dispose();
                     }
                 }
                 else
@@ -88,8 +70,8 @@ namespace WinFormTestConnectApp
 
         private void CloseConnect_Click(object sender, EventArgs e)
         {
-            SocketClientAPI.CloseConnection();
-            isInitialized = false;
+            bool isClose = SocketClientAPI.CloseConnection();
+            if (isClose) isInitialized = false;
             label2.Text = "Not Connected";
         }
     }

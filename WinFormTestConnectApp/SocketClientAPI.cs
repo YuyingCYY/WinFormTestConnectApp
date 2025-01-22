@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System;
+using System.IO;
 
 namespace WinFormTestConnectApp
 {
@@ -29,7 +30,7 @@ namespace WinFormTestConnectApp
         /// 關閉連接
         /// </summary>
         [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void CloseConnection();
+        public static extern bool CloseConnection();
 
         /// <summary>
         /// 釋放資源
@@ -46,5 +47,33 @@ namespace WinFormTestConnectApp
         /// <param name="applicableProjects">適用專案</param>
         [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr GetBinFileInfo(string askId, string productSeries, string applicableProjects, string customizeId);
+
+        public static FileStream GetBinFileStream(string askId, string productSeries, string applicableProjects, string customizeId)
+        {
+            IntPtr fileInfoPtr = GetBinFileInfo(askId, productSeries, applicableProjects, customizeId);
+            if (fileInfoPtr == IntPtr.Zero)
+            {
+                throw new Exception("Failed to receive file");
+            }
+
+            try
+            {
+                // 將 Ptr 轉換成 FileInfo 結構
+                FileInfo fileInfo = Marshal.PtrToStructure<FileInfo>(fileInfoPtr);
+                byte[] buffer = new byte[(int)fileInfo.Size];
+                Marshal.Copy(fileInfo.Data, buffer, 0, (int)fileInfo.Size);
+
+                // 創建臨時檔案
+                string tempPath = Path.Combine(Path.GetTempPath(), fileInfo.FileName);
+                File.WriteAllBytes(tempPath, buffer);
+
+                // 返回檔案的 FileStream，使用 FileMode.Open 確保檔案存在
+                return new FileStream(tempPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.DeleteOnClose);
+            }
+            finally
+            {
+                FreeFileInfo(fileInfoPtr);
+            }
+        }
     }
 }
