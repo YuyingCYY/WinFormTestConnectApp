@@ -15,6 +15,40 @@ namespace WinFormTestConnectApp
             public string FileName;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MainAppInfo
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string Version;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string BLVersion;
+            public int CalibrationOffset;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ShieldedZoneInfo
+        {
+            public int start;
+            public int end;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+        public struct DefaultParametersInfo
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string Version;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string BLVersion;
+
+            public int CalibrationOffset;
+
+            public int ShieldedZoneCount;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50)]
+            public ShieldedZoneInfo[] ShieldedZone;
+        }
+
         /// <summary>
         /// 初始化客戶端
         /// </summary>
@@ -32,6 +66,12 @@ namespace WinFormTestConnectApp
         [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool CloseConnection();
 
+        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr GetMainAppInfo(string productSeries, string applicableProjects, string customizeId);
+
+        [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr GetDefaultParametersInfo(string productSeries, string applicableProjects, string customizeId);
+
         /// <summary>
         /// 釋放資源
         /// </summary>
@@ -47,6 +87,20 @@ namespace WinFormTestConnectApp
         /// <param name="applicableProjects">適用專案</param>
         [DllImport("SocketClient.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr GetBinFileInfo(string askId, string productSeries, string applicableProjects, string customizeId);
+
+        public static MainAppInfo GetMainApp(string productSeries, string applicableProjects, string customizeId)
+        {
+            IntPtr mainAppInfoPtr = GetMainAppInfo(productSeries, applicableProjects, customizeId);
+            MainAppInfo mainAppInfo = Marshal.PtrToStructure<MainAppInfo>(mainAppInfoPtr);
+            return mainAppInfo;
+        }
+
+        public static DefaultParametersInfo GetDefaultParameters(string productSeries, string applicableProjects, string customizeId)
+        {
+            IntPtr defaultParamInfoPtr = GetDefaultParametersInfo(productSeries, applicableProjects, customizeId);
+            DefaultParametersInfo defaultParamInfo = Marshal.PtrToStructure<DefaultParametersInfo>(defaultParamInfoPtr);
+            return defaultParamInfo;
+        }
 
         public static FileStream GetBinFileStream(string askId, string productSeries, string applicableProjects, string customizeId)
         {
